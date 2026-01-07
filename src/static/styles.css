@@ -92,16 +92,37 @@ section h3 {
 }
 
 .activity-card .participants ul {
-  list-style: disc;
-  padding-left: 20px;
+  list-style: none;
+  padding-left: 0;
   margin: 0;
 }
 
 .activity-card .participants li {
-  padding: 4px 0;
+  padding: 6px 8px;
   color: #333;
   font-size: 14px;
   line-height: 1.3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.activity-card .participants .participant-email {
+  overflow-wrap: anywhere;
+}
+
+.activity-card .participants .delete-btn {
+  background: transparent;
+  border: none;
+  color: #c62828;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.activity-card .participants .delete-btn:hover {
+  background-color: rgba(198,40,40,0.08);
 }
 
 /* Small, muted placeholder when no participants */

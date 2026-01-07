@@ -34,7 +34,14 @@ document.addEventListener("DOMContentLoaded", () => {
         // Render participants as a bulleted list; show friendly text if none
         const participantsHtml =
           details.participants && details.participants.length
-            ? `<ul>${details.participants.map((p) => `<li>${escapeHtml(p)}</li>`).join("")}</ul>`
+            ? `<ul>${details.participants
+                .map(
+                  (p) =>
+                    `<li><span class="participant-email">${escapeHtml(p)}</span> <button class="delete-btn" data-activity="${escapeHtml(
+                      name
+                    )}" data-email="${escapeHtml(p)}" aria-label="Remove participant">✖</button></li>`
+                )
+                .join("")}</ul>`
             : `<ul><li class="empty">No participants yet</li></ul>`;
 
         activityCard.innerHTML = `
@@ -49,6 +56,45 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         activitiesList.appendChild(activityCard);
+
+        // Attach delete handlers for participant remove buttons
+        activityCard.querySelectorAll(".delete-btn").forEach((btn) => {
+          btn.addEventListener("click", async (e) => {
+            const email = btn.dataset.email;
+            const activity = btn.dataset.activity;
+
+            try {
+              const resp = await fetch(
+                `/activities/${encodeURIComponent(activity)}/participants?email=${encodeURIComponent(email)}`,
+                { method: "DELETE" }
+              );
+              const result = await resp.json();
+
+              if (resp.ok) {
+                // Remove the participant element from the DOM
+                const li = btn.closest("li");
+                const ul = li.parentNode;
+                ul.removeChild(li);
+
+                // If no participants remain, show placeholder
+                if (ul.querySelectorAll("li").length === 0) {
+                  ul.innerHTML = `<li class="empty">No participants yet</li>`;
+                }
+              } else {
+                messageDiv.textContent = result.detail || result.message || "Failed to unregister";
+                messageDiv.className = "error";
+                messageDiv.classList.remove("hidden");
+                setTimeout(() => messageDiv.classList.add("hidden"), 5000);
+              }
+            } catch (err) {
+              console.error("Error unregistering:", err);
+              messageDiv.textContent = "Failed to unregister. Please try again.";
+              messageDiv.className = "error";
+              messageDiv.classList.remove("hidden");
+              setTimeout(() => messageDiv.classList.add("hidden"), 5000);
+            }
+          });
+        });
 
         // Add option to select dropdown
         const option = document.createElement("option");
